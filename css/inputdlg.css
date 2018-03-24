@@ -1,0 +1,56 @@
+
+.analyzer-dlg {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+}
+
+.analyzer-dlg-show {
+  display: block;
+}
+
+.analyzer-dlg-close {
+  display: none;
+}
+
+.analyzer-input-form {
+  width: 50%;
+  margin: 20px auto;
+  margin-top: 300px;
+  z-index: 20;
+  border: 1px solid black;
+  background-color: white;
+  padding: 10px;
+}
+
+.analyzer-input-form-uri {
+  font-family: LevelOne, "Lucida Grande", Helvetica, Arial;
+  font-size: 20pt;
+  width: 97%;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+  margin-bottom: 15px;
+  padding: 6px 12px 6px 12px;
+  line-height: 1.42857143;
+}
+
+.analyzer-input-form-submit {
+  color: #fff;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+  font-family: LevelOne, "Lucida Grande", Helvetica, Arial;
+  font-size: 20pt;
+  padding: 6px 12px 6px 12px;
+  line-height: 1.42857143;
+  cursor: pointer;
+  touch-action: manipulation;
+  text-align: center;
+  font-weight: 400;
+  user-select: none;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}

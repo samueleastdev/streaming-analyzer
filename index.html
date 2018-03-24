@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Analyze and Visualize HTTP ABR Streams</title>
+    <meta name="description" content="Analyze and Visualize HLS or MPEG-DASH streams"/>
+    <link rel="stylesheet" href="dist/analyzer.css" />
+  </head>
+  <body>
+    <div id="analyzer-wrapper"></div>
+    <script src="dist/analyzer.js" type="text/javascript"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function(event) {
+        setupAnalyzer('analyzer-wrapper')
+        .then(function() {
+          console.log("Analyzer running");
+        })
+        .catch(console.error);
+      });
+    </script>
+  </body>
+</html>
