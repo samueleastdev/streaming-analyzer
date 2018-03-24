@@ -87601,8 +87601,9 @@ var AbrVisualizer = function () {
               var g = 255 - r;
               var c = 'rgb(' + r + ',' + g + ',0)';
               canvasCtx.fillStyle = c;
+              var h = d.sizeBytes / maxSize * maxBarHeight;
               //console.log(x, y, (d.durationSec / maxSegmentDuration) * maxBarWidth, (d.sizeBytes / maxSize) * maxBarHeight);
-              canvasCtx.fillRect(x, y, d.durationSec / maxSegmentDuration * maxBarWidth, d.sizeBytes / maxSize * maxBarHeight);
+              canvasCtx.fillRect(x, y + (maxBarHeight - h), d.durationSec / maxSegmentDuration * maxBarWidth, h);
             }
           }
         }.bind(_this);
