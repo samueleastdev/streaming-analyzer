@@ -10,7 +10,7 @@ window.setupAnalyzer = function (wrapperId) {
   });
 };
 
-},{"./src/analyzer.js":353}],2:[function(require,module,exports){
+},{"./src/analyzer.js":354}],2:[function(require,module,exports){
 'use strict';
 
 var KEYWORDS = [
@@ -87548,6 +87548,79 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var AbrStats = function () {
+  function AbrStats(videoPlayer, wrapperElement) {
+    _classCallCheck(this, AbrStats);
+
+    this._videoPlayer = videoPlayer;
+
+    this._wrapperElement = this._setupLayout(wrapperElement);
+  }
+
+  _createClass(AbrStats, [{
+    key: 'init',
+    value: function init() {
+      var _this = this;
+
+      return new Promise(function (resolve, reject) {
+        _this._intervalId = setInterval(function () {
+          this._updateStats();
+        }.bind(_this), 5000);
+
+        _this._updateStats();
+        resolve();
+      });
+    }
+  }, {
+    key: '_updateStats',
+    value: function _updateStats() {
+      var amd = this._videoPlayer.abrMetadata;
+      if (amd && amd.stats) {
+        var html = '';
+        html += '<table class="metadata">';
+        html += '<tr>';
+        html += '<th>Downloaded Chunks</th>';
+        html += '<th>Average Chunk Duration</th>';
+        html += '<th>Average Chunk Size</th>';
+        html += '<th>Average Chunk Load Time</th>';
+        html += '<th>Average Chunk Bitrate</th>';
+        html += '</tr>';
+        html += '<tr>';
+        html += '<td>' + amd.stats.chunksDownloaded + ' chunks</td>';
+        html += '<td>' + amd.stats.averageChunkDuration.toFixed(2) + ' sec</td>';
+        html += '<td>' + amd.stats.averageChunkSizeKB.toFixed(2) + ' KB</td>';
+        html += '<td>' + amd.stats.averageLoadTime.toFixed(2) + ' sec</td>';
+        html += '<td>' + amd.stats.averageChunkBitrateKbps.toFixed(0) + ' Kbps</td>';
+        html += '</tr>';
+        html += '</table>';
+        this._wrapperElement.innerHTML = html;
+        this._wrapperElement.className = 'analyzer-abrstats analyzer-abrstats-visible';
+      }
+    }
+  }, {
+    key: '_setupLayout',
+    value: function _setupLayout(wrapper) {
+      var statsElement = document.createElement('div');
+      statsElement.className = 'analyzer-abrstats analyzer-abrstats-hidden';
+      statsElement.id = 'analyzer-abrstats';
+
+      wrapper.appendChild(statsElement);
+      return statsElement;
+    }
+  }]);
+
+  return AbrStats;
+}();
+
+module.exports = AbrStats;
+
+},{}],353:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 var AbrVisualizer = function () {
   function AbrVisualizer(videoElement, wrapperElement, videoPlayer) {
     _classCallCheck(this, AbrVisualizer);
@@ -87632,7 +87705,7 @@ var AbrVisualizer = function () {
 
 module.exports = AbrVisualizer;
 
-},{}],353:[function(require,module,exports){
+},{}],354:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -87643,6 +87716,7 @@ var InputDlg = require('./input_dlg.js');
 var VideoPlayer = require('./video_player.js');
 var AudioVisualizer = require('./audio_visualizer.js');
 var AbrVisualizer = require('./abr_visualizer.js');
+var AbrStats = require('./abr_stats.js');
 var Metadata = require('./metadata.js');
 
 var TITLE = 'Streaming Analyzer';
@@ -87676,6 +87750,9 @@ var Analyzer = function () {
           }).then(function () {
             var techMetadata = new Metadata(_this2._videoPlayer, overlayElement);
             return techMetadata.init();
+          }).then(function () {
+            var abrStats = new AbrStats(_this2._videoPlayer, overlayElement);
+            return abrStats.init();
           }).then(function () {
             var abrViz = new AbrVisualizer(videoElement, overlayElement, _this2._videoPlayer);
             return abrViz.init();
@@ -87732,7 +87809,7 @@ var Analyzer = function () {
 
 module.exports = Analyzer;
 
-},{"./abr_visualizer.js":352,"./audio_visualizer.js":354,"./input_dlg.js":355,"./metadata.js":356,"./video_player.js":357}],354:[function(require,module,exports){
+},{"./abr_stats.js":352,"./abr_visualizer.js":353,"./audio_visualizer.js":355,"./input_dlg.js":356,"./metadata.js":357,"./video_player.js":358}],355:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -87808,7 +87885,7 @@ var AudioVisualizer = function () {
 
 module.exports = AudioVisualizer;
 
-},{}],355:[function(require,module,exports){
+},{}],356:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -87877,7 +87954,7 @@ var InputDlg = function () {
 
 module.exports = InputDlg;
 
-},{}],356:[function(require,module,exports){
+},{}],357:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -87952,7 +88029,7 @@ var Metadata = function () {
 
 module.exports = Metadata;
 
-},{}],357:[function(require,module,exports){
+},{}],358:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -87981,6 +88058,13 @@ var VideoPlayer = function () {
     this._abrMetadata;
     this._abrTimeSeries = [];
     this._levelBucketCount = 0;
+    this._abrStats = {
+      totalChunkCount: 0,
+      totalChunkDuration: 0,
+      totalChunkSizeKB: 0,
+      totalLoadTimeSec: 0,
+      totalChunkBitrateKbps: 0
+    };
   }
 
   _createClass(VideoPlayer, [{
@@ -88057,6 +88141,21 @@ var VideoPlayer = function () {
             sizeBytes: data.stats.total,
             durationSec: data.frag.duration
           });
+          _this2._abrStats.totalChunkCount++;
+          _this2._abrStats.totalChunkDuration += data.frag.duration;
+          _this2._abrStats.totalChunkSizeKB += data.stats.total / 1000;
+          _this2._abrStats.totalLoadTimeSec += (data.stats.tload - data.stats.trequest) / 1000;
+          var chunkBitrate = data.stats.total * 8 / data.frag.duration;
+          _this2._abrStats.totalChunkBitrateKbps += chunkBitrate / 1000;
+          if (_this2._abrMetadata) {
+            _this2._abrMetadata.stats = {
+              chunksDownloaded: _this2._abrStats.totalChunkCount,
+              averageChunkDuration: _this2._abrStats.totalChunkDuration / _this2._abrStats.totalChunkCount,
+              averageChunkSizeKB: _this2._abrStats.totalChunkSizeKB / _this2._abrStats.totalChunkCount,
+              averageLoadTime: _this2._abrStats.totalLoadTimeSec / _this2._abrStats.totalChunkCount,
+              averageChunkBitrateKbps: _this2._abrStats.totalChunkBitrateKbps / _this2._abrStats.totalChunkCount
+            };
+          }
         });
         _this2._playerTech = hls;
       });

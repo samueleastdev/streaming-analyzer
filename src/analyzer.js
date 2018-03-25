@@ -2,6 +2,7 @@ const InputDlg = require('./input_dlg.js');
 const VideoPlayer = require('./video_player.js');
 const AudioVisualizer = require('./audio_visualizer.js');
 const AbrVisualizer = require('./abr_visualizer.js');
+const AbrStats = require('./abr_stats.js');
 const Metadata = require('./metadata.js');
 
 const TITLE = 'Streaming Analyzer';
@@ -27,6 +28,9 @@ class Analyzer {
         }).then(() => {
           const techMetadata = new Metadata(this._videoPlayer, overlayElement);
           return techMetadata.init();
+        }).then(() => {
+          const abrStats = new AbrStats(this._videoPlayer, overlayElement);
+          return abrStats.init();
         }).then(() => {
           const abrViz = new AbrVisualizer(videoElement, overlayElement, this._videoPlayer);
           return abrViz.init();

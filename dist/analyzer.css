@@ -171,3 +171,34 @@
 .metadata td {
   text-align: center;
 }
+
+.analyzer-abrstats {
+  position: absolute;
+  font-family: LevelOne, "Lucida Grande", Helvetica, Arial;
+  font-size: 14pt;
+  color: black;
+  background: white;
+  left: 60px;
+  width: 1780px;
+  bottom: 80px;
+  padding: 12px;
+  z-index: 20;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  transition: visibility 0s linear 0.7s, opacity 0.7s ease-in-out;
+}
+
+.analyzer-abrstats-visible {
+  transition-delay: 0s;visibility: visible; opacity: 1;
+}
+
+.analyzer-abrstats-hidden {
+  opacity: 0; visibility:hidden;  
+}
+
+.analyzer-abrstats h2 {
+  font-size: 18pt;
+  font-weight: 400;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}

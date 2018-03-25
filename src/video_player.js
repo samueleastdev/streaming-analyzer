@@ -18,6 +18,13 @@ class VideoPlayer {
     this._abrMetadata;
     this._abrTimeSeries = [];
     this._levelBucketCount = 0;
+    this._abrStats = {
+      totalChunkCount: 0,
+      totalChunkDuration: 0,
+      totalChunkSizeKB: 0,
+      totalLoadTimeSec: 0,
+      totalChunkBitrateKbps: 0,
+    }
   }
 
   init() {
@@ -99,6 +106,21 @@ class VideoPlayer {
           sizeBytes: data.stats.total,
           durationSec: data.frag.duration,
         });
+        this._abrStats.totalChunkCount++;
+        this._abrStats.totalChunkDuration += data.frag.duration;
+        this._abrStats.totalChunkSizeKB += (data.stats.total / 1000);
+        this._abrStats.totalLoadTimeSec += ((data.stats.tload - data.stats.trequest) / 1000);
+        const chunkBitrate = (data.stats.total * 8) / data.frag.duration;
+        this._abrStats.totalChunkBitrateKbps += (chunkBitrate / 1000);
+        if (this._abrMetadata) {
+          this._abrMetadata.stats = {
+            chunksDownloaded: this._abrStats.totalChunkCount,
+            averageChunkDuration: this._abrStats.totalChunkDuration / this._abrStats.totalChunkCount,
+            averageChunkSizeKB: this._abrStats.totalChunkSizeKB / this._abrStats.totalChunkCount,
+            averageLoadTime: this._abrStats.totalLoadTimeSec / this._abrStats.totalChunkCount,
+            averageChunkBitrateKbps: this._abrStats.totalChunkBitrateKbps / this._abrStats.totalChunkCount,
+          };
+        }
       });
       this._playerTech = hls;
     });
