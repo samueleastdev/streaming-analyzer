@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-css": "cat css/*.css > dist/analyzer.css && cp fonts/*.woff dist/",
     "build": "npm run build-css && $(npm bin)/browserify -t [ babelify --presets [ es2015 ] ] index.js -o dist/analyzer.js",
-    "start": "python -m SimpleHTTPServer 3000"
+    "start": "cd dist && python -m SimpleHTTPServer 3000"
   },
   "author": "Jonas Birmé <jonas.birme@eyevinn.se>",
   "license": "MIT",
