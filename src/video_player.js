@@ -63,6 +63,11 @@ class VideoPlayer {
       hls.on(Hls.Events.MEDIA_ATTACHED, () => {
         hls.loadSource(this._uri);
       });
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        if (data.fatal) {
+          reject(data.details);
+        }
+      });
       hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
         console.log(data);
         this._videoElement.play();
@@ -137,11 +142,15 @@ class VideoPlayer {
   _determineType(uri) {
     return new Promise((resolve, reject) => {
       request(uri, (err, resp, body) => {
-        const type = CONTENT_TYPE_MAP[resp.headers['content-type']];
-        if (!type) {
-          reject(`Unsupported content '${resp.headers['content-type']}'`);
+        if (resp.statusCode !== 200) {
+          reject('Stream not found');
         } else {
-          resolve(type);
+          const type = CONTENT_TYPE_MAP[resp.headers['content-type']];
+          if (!type) {
+            reject(`Unsupported content '${resp.headers['content-type']}'`);
+          } else {
+            resolve(type);
+          }
         }
       });
     });

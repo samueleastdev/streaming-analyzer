@@ -1,4 +1,5 @@
 const InputDlg = require('./input_dlg.js');
+const ErrorDlg = require('./error_dlg.js');
 const VideoPlayer = require('./video_player.js');
 const AudioVisualizer = require('./audio_visualizer.js');
 const AbrVisualizer = require('./abr_visualizer.js');
@@ -12,6 +13,8 @@ class Analyzer {
     this._wrapperElement = this._initWrapper(wrapperId);
     this._inputDlg = new InputDlg();
     this._wrapperElement.appendChild(this._inputDlg.wrapper);
+    this._errorDlg = new ErrorDlg();
+    this._wrapperElement.appendChild(this._errorDlg.wrapper);
   }
 
   start() {
@@ -37,9 +40,17 @@ class Analyzer {
         }).then(() => {
           resolve();
         })
-        .catch(reject);
-      };
+        .catch(errmsg => {
+          this._handleError(errmsg);
+        });
+      }.bind(this);
     });
+  }
+
+  _handleError(msg) {
+    console.error(msg);
+    this._errorDlg.message = msg;
+    this._errorDlg.show();
   }
 
   _initWrapper(wrapperId) {
@@ -79,7 +90,7 @@ class Analyzer {
     const overlayLegend = document.createElement('div');
     overlayLegend.className = 'analyzer-overlay-legend';
     let htmlLegend = '';
-    htmlLegend += '<p>Developed by <a href="http://www.eyevinntechnology.se">Eyevinn Technology</a>. Report issues <a href="https://github.com/Eyevinn/streaming-analyzer/issues">here</a>. ';
+    htmlLegend += '<p>Developed by <a href="http://www.eyevinntechnology.se">Eyevinn Technology</a> and built on <a href="https://github.com/video-dev/hls.js">hls.js</a>. Report issues <a href="https://github.com/Eyevinn/streaming-analyzer/issues">here</a>. ';
     htmlLegend += 'Click on window to hide Analyzer</p>';
     overlayLegend.innerHTML = htmlLegend;
 

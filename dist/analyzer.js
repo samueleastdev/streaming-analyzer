@@ -87713,6 +87713,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var InputDlg = require('./input_dlg.js');
+var ErrorDlg = require('./error_dlg.js');
 var VideoPlayer = require('./video_player.js');
 var AudioVisualizer = require('./audio_visualizer.js');
 var AbrVisualizer = require('./abr_visualizer.js');
@@ -87728,6 +87729,8 @@ var Analyzer = function () {
     this._wrapperElement = this._initWrapper(wrapperId);
     this._inputDlg = new InputDlg();
     this._wrapperElement.appendChild(this._inputDlg.wrapper);
+    this._errorDlg = new ErrorDlg();
+    this._wrapperElement.appendChild(this._errorDlg.wrapper);
   }
 
   _createClass(Analyzer, [{
@@ -87758,9 +87761,18 @@ var Analyzer = function () {
             return abrViz.init();
           }).then(function () {
             resolve();
-          }).catch(reject);
-        };
+          }).catch(function (errmsg) {
+            _this2._handleError(errmsg);
+          });
+        }.bind(_this);
       });
+    }
+  }, {
+    key: '_handleError',
+    value: function _handleError(msg) {
+      console.error(msg);
+      this._errorDlg.message = msg;
+      this._errorDlg.show();
     }
   }, {
     key: '_initWrapper',
@@ -87801,7 +87813,7 @@ var Analyzer = function () {
       var overlayLegend = document.createElement('div');
       overlayLegend.className = 'analyzer-overlay-legend';
       var htmlLegend = '';
-      htmlLegend += '<p>Developed by <a href="http://www.eyevinntechnology.se">Eyevinn Technology</a>. Report issues <a href="https://github.com/Eyevinn/streaming-analyzer/issues">here</a>. ';
+      htmlLegend += '<p>Developed by <a href="http://www.eyevinntechnology.se">Eyevinn Technology</a> and built on <a href="https://github.com/video-dev/hls.js">hls.js</a>. Report issues <a href="https://github.com/Eyevinn/streaming-analyzer/issues">here</a>. ';
       htmlLegend += 'Click on window to hide Analyzer</p>';
       overlayLegend.innerHTML = htmlLegend;
 
@@ -87817,7 +87829,7 @@ var Analyzer = function () {
 
 module.exports = Analyzer;
 
-},{"./abr_stats.js":352,"./abr_visualizer.js":353,"./audio_visualizer.js":355,"./input_dlg.js":356,"./metadata.js":357,"./video_player.js":358}],355:[function(require,module,exports){
+},{"./abr_stats.js":352,"./abr_visualizer.js":353,"./audio_visualizer.js":355,"./error_dlg.js":356,"./input_dlg.js":357,"./metadata.js":358,"./video_player.js":359}],355:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -87900,6 +87912,59 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var ErrorDlg = function () {
+  function ErrorDlg() {
+    _classCallCheck(this, ErrorDlg);
+
+    this._wrapperElement = this._initErrorDlg();
+  }
+
+  _createClass(ErrorDlg, [{
+    key: 'show',
+    value: function show() {
+      this._wrapperElement.className = 'analyzer-error analyzer-error-visible';
+    }
+  }, {
+    key: 'hide',
+    value: function hide() {
+      this._wrapperElement.className = 'analyzer-error analyzer-error-hidden';
+    }
+  }, {
+    key: '_initErrorDlg',
+    value: function _initErrorDlg() {
+      var dlgElement = document.createElement('div');
+      dlgElement.className = 'analyzer-error analyzer-error-hidden';
+      dlgElement.id = 'analyzer-error';
+
+      return dlgElement;
+    }
+  }, {
+    key: 'wrapper',
+    get: function get() {
+      return this._wrapperElement;
+    }
+  }, {
+    key: 'message',
+    set: function set(msg) {
+      this._message = msg;
+      this._wrapperElement.innerHTML = msg;
+    }
+  }]);
+
+  return ErrorDlg;
+}();
+
+module.exports = ErrorDlg;
+
+},{}],357:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var EXAMPLE_ASSETS = [{ name: 'Jan Ozer at STSWE17 (HLS, long)', uri: 'https://maitv-vod.lab.eyevinn.technology/stswe17-ozer.mp4/master.m3u8' }, { name: 'VINN showreel (HLS, short)', uri: 'https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8' }, { name: 'Streambox (HLS, live)', uri: 'http://www.streambox.fr/playlists/test_001/stream.m3u8' }, { name: 'Eyevinn Channel Engine (HLS, live)', uri: 'https://ott-channel-engine.herokuapp.com/live/master.m3u8' }];
+
 var InputDlg = function () {
   function InputDlg() {
     _classCallCheck(this, InputDlg);
@@ -87917,10 +87982,27 @@ var InputDlg = function () {
       formElement.className = 'analyzer-input-form';
       var inputElement = document.createElement('input');
       inputElement.className = 'analyzer-input-form-uri';
-      inputElement.setAttribute('placeholder', 'Enter URI to video stream');
+      inputElement.setAttribute('placeholder', 'Enter URI to video stream or choose from one of the example assets below');
       inputElement.id = 'uri';
 
+      var exampleElement = document.createElement('select');
+      exampleElement.className = 'analyzer-input-form-examples';
+      exampleElement.id = 'examples';
+      var exampleHtml = '';
+      exampleHtml += '<option></option>';
+      EXAMPLE_ASSETS.forEach(function (asset) {
+        exampleHtml += '<option value="' + asset.uri + '">' + asset.name + '</option>';
+      });
+      exampleElement.innerHTML = exampleHtml;
+      exampleElement.addEventListener('change', function (ev) {
+        var inp = document.getElementById('uri');
+        if (ev.target.value) {
+          inp.value = ev.target.value;
+        }
+      });
+
       formElement.appendChild(inputElement);
+      formElement.appendChild(exampleElement);
 
       var submitButton = document.createElement('button');
       submitButton.className = 'analyzer-input-form-submit';
@@ -87962,7 +88044,7 @@ var InputDlg = function () {
 
 module.exports = InputDlg;
 
-},{}],357:[function(require,module,exports){
+},{}],358:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -88037,7 +88119,7 @@ var Metadata = function () {
 
 module.exports = Metadata;
 
-},{}],358:[function(require,module,exports){
+},{}],359:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -88105,6 +88187,11 @@ var VideoPlayer = function () {
         hls.attachMedia(_this2._videoElement);
         hls.on(Hls.Events.MEDIA_ATTACHED, function () {
           hls.loadSource(_this2._uri);
+        });
+        hls.on(Hls.Events.ERROR, function (event, data) {
+          if (data.fatal) {
+            reject(data.details);
+          }
         });
         hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
           console.log(data);
@@ -88182,11 +88269,15 @@ var VideoPlayer = function () {
     value: function _determineType(uri) {
       return new Promise(function (resolve, reject) {
         request(uri, function (err, resp, body) {
-          var type = CONTENT_TYPE_MAP[resp.headers['content-type']];
-          if (!type) {
-            reject('Unsupported content \'' + resp.headers['content-type'] + '\'');
+          if (resp.statusCode !== 200) {
+            reject('Stream not found');
           } else {
-            resolve(type);
+            var type = CONTENT_TYPE_MAP[resp.headers['content-type']];
+            if (!type) {
+              reject('Unsupported content \'' + resp.headers['content-type'] + '\'');
+            } else {
+              resolve(type);
+            }
           }
         });
       });

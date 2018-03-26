@@ -1,0 +1,21 @@
+.analyzer-error {
+  position: absolute;
+  width: 100%;
+  background-color: red;
+  color: white;
+  font-size: 25pt;
+  height: 80px;
+  text-align: center;
+  padding-top: 40px;
+  font-family: LevelOne, "Lucida Grande", Helvetica, Arial;
+  top: 0px;
+  opacity: 0.8;
+}
+
+.analyzer-error-hidden {
+  display: none;  
+}
+
+.analyzer-error-visible {
+  display: block;
+}
