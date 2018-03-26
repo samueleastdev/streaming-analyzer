@@ -78,6 +78,20 @@
   transition: visibility 0s linear 0.7s, opacity 0.7s ease-in-out;
 }
 
+.analyzer-overlay p {
+  color: white;
+  font-size: 14pt;
+  font-family: LevelOne, "Lucida Grande", Helvetica, Arial;
+}
+
+.analyzer-overlay a {
+  color: white;
+}
+
+.analyzer-overlay a:visited {
+  color: rgb(15,186,240);
+}
+
 .analyzer-overlay-visible {
   transition-delay: 0s;visibility: visible; opacity: 0.5;
 }
@@ -109,6 +123,14 @@
   top: 10px;
   height: 200px;
   width: 1920px;
+}
+
+.analyzer-overlay-legend {
+  position: absolute;
+  top: 120px;
+  left: 30px;
+  width: 400px;
+  font-style: italic;
 }
 
 .analyzer-overlay-branding-title {

@@ -87798,6 +87798,14 @@ var Analyzer = function () {
 
       overlayElement.appendChild(overlayBranding);
 
+      var overlayLegend = document.createElement('div');
+      overlayLegend.className = 'analyzer-overlay-legend';
+      var htmlLegend = '';
+      htmlLegend += '<p>Developed by <a href="http://www.eyevinntechnology.se">Eyevinn Technology</a>. Report issues <a href="https://github.com/Eyevinn/streaming-analyzer/issues">here</a>. ';
+      htmlLegend += 'Click on window to hide Analyzer</p>';
+      overlayLegend.innerHTML = htmlLegend;
+
+      overlayElement.appendChild(overlayLegend);
       wrapperElement.appendChild(overlayElement);
 
       return wrapperElement;
