@@ -97,7 +97,7 @@
 
 .analyzer-abr-visualizer {
   position: absolute;
-  bottom: 180px;
+  bottom: 190px;
   height: 300px;
   left: 0px;
   z-index: 5;
@@ -123,7 +123,7 @@
 
 .analyzer-overlay-branding-logo {
   position: absolute;
-  background: url('https://tv.eyevinn.technology/eyevinnlogo.png') no-repeat;
+  background: url('eyevinnlogo.png') no-repeat;
   background-size: 100% 100%;
   width: 300px;
   height: 80px;
@@ -139,7 +139,7 @@
   background: white;
   right: 60px;
   width: 400px;
-  top: 200px;
+  top: 140px;
   padding: 12px;
   z-index: 20;
   border-radius: 4px;
