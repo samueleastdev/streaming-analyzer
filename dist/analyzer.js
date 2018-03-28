@@ -88191,6 +88191,7 @@ var Analyzer = function () {
           this._videoPlayer.init().then(function () {
             overlayElement.className = 'analyzer-overlay analyzer-overlay-visible';
             var audioViz = new AudioVisualizer(videoElement, overlayElement);
+            console.log('Initializing audio visualizer');
             return audioViz.init();
           }).then(function () {
             var techMetadata = new Metadata(_this2._videoPlayer, overlayElement);
@@ -88200,8 +88201,10 @@ var Analyzer = function () {
             return abrStats.init();
           }).then(function () {
             var abrViz = new AbrVisualizer(videoElement, overlayElement, _this2._videoPlayer);
+            console.log('Initializing ABR visualizer');
             return abrViz.init();
           }).then(function () {
+            _this2._videoPlayer.play();
             resolve();
           }).catch(function (errmsg) {
             _this2._handleError(errmsg);
@@ -88628,6 +88631,11 @@ var VideoPlayer = function () {
       });
     }
   }, {
+    key: 'play',
+    value: function play() {
+      this._videoElement.play();
+    }
+  }, {
     key: '_initiateDashPlayer',
     value: function _initiateDashPlayer() {
       var _this2 = this;
@@ -88648,37 +88656,19 @@ var VideoPlayer = function () {
       var _this3 = this;
 
       return new Promise(function (resolve, reject) {
-        var hls = new Hls();
+        var hls = new Hls({
+          enableWorker: true
+        });
+        _this3._playerTech = hls;
+
         hls.attachMedia(_this3._videoElement);
         hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+          console.log('Video element attached');
           hls.loadSource(_this3._uri);
         });
-        hls.on(Hls.Events.ERROR, function (event, data) {
-          if (data.fatal) {
-            reject(data.details);
-          }
-        });
-        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-          console.log(data);
-          _this3._videoElement.play();
 
-          var availableLevels = [];
-          data.levels.forEach(function (l) {
-            availableLevels.push({
-              bitrate: l.bitrate,
-              resolution: l.width + 'x' + l.height,
-              videoCodec: l.videoCodec,
-              audioCodec: l.audioCodec
-            });
-          });
-          _this3._levelBucketCount = availableLevels.length;
-          _this3._abrMetadata = {
-            availableLevels: availableLevels
-          };
-          resolve();
-        });
         hls.on(Hls.Events.BUFFER_CODECS, function (event, data) {
-          console.log(data);
+          //console.log(data);
           _this3._codecMetadata = {
             audio: {
               container: data.audio.container,
@@ -88692,6 +88682,7 @@ var VideoPlayer = function () {
             }
           };
         });
+
         hls.on(Hls.Events.FRAG_LOADED, function (event, data) {
           //console.log(data);
           _this3._pushAbrTimeSeriesData({
@@ -88717,7 +88708,33 @@ var VideoPlayer = function () {
             };
           }
         });
-        _this3._playerTech = hls;
+
+        hls.on(Hls.Events.ERROR, function (event, data) {
+          if (data.fatal) {
+            console.error(data);
+          }
+        });
+
+        hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+          console.log('Manifest parsed');
+          console.log(data);
+
+          var availableLevels = [];
+          data.levels.forEach(function (l) {
+            availableLevels.push({
+              bitrate: l.bitrate,
+              resolution: l.width + 'x' + l.height,
+              videoCodec: l.videoCodec,
+              audioCodec: l.audioCodec
+            });
+          });
+          _this3._levelBucketCount = availableLevels.length;
+          _this3._abrMetadata = {
+            availableLevels: availableLevels
+          };
+
+          resolve();
+        });
       });
     }
   }, {

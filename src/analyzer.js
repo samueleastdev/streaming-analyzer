@@ -27,6 +27,7 @@ class Analyzer {
         this._videoPlayer.init().then(() => {
           overlayElement.className = 'analyzer-overlay analyzer-overlay-visible';
           const audioViz = new AudioVisualizer(videoElement, overlayElement);
+          console.log('Initializing audio visualizer');
           return audioViz.init();
         }).then(() => {
           const techMetadata = new Metadata(this._videoPlayer, overlayElement);
@@ -36,8 +37,10 @@ class Analyzer {
           return abrStats.init();
         }).then(() => {
           const abrViz = new AbrVisualizer(videoElement, overlayElement, this._videoPlayer);
+          console.log('Initializing ABR visualizer');
           return abrViz.init();
         }).then(() => {
+          this._videoPlayer.play();
           resolve();
         })
         .catch(errmsg => {
