@@ -88191,7 +88191,9 @@ var VideoPlayer = function () {
       var _this2 = this;
 
       return new Promise(function (resolve, reject) {
-        var hls = new Hls();
+        var hls = new Hls({
+          enableWorker: true
+        });
         _this2._playerTech = hls;
 
         hls.attachMedia(_this2._videoElement);

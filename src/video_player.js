@@ -62,7 +62,9 @@ class VideoPlayer {
 
   _initiateHlsPlayer() {
     return new Promise((resolve, reject) => {
-      const hls = new Hls();
+      const hls = new Hls({
+        enableWorker: true,
+      });
       this._playerTech = hls;
 
       hls.attachMedia(this._videoElement);
