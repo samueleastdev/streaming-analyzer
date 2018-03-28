@@ -59,36 +59,16 @@ class VideoPlayer {
   _initiateHlsPlayer() {
     return new Promise((resolve, reject) => {
       const hls = new Hls();
+      this._playerTech = hls;
+
       hls.attachMedia(this._videoElement);
       hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+        console.log('Video element attached');
         hls.loadSource(this._uri);
       });
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        if (data.fatal) {
-          reject(data.details);
-        }
-      });
-      hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
-        console.log(data);
-        this._videoElement.play();
 
-        let availableLevels = [];
-        data.levels.forEach(l => {
-          availableLevels.push({
-            bitrate: l.bitrate,
-            resolution: l.width + 'x' + l.height,
-            videoCodec: l.videoCodec,
-            audioCodec: l.audioCodec,
-          });
-        });
-        this._levelBucketCount = availableLevels.length;
-        this._abrMetadata = {
-          availableLevels,
-        };
-        resolve();
-      });
       hls.on(Hls.Events.BUFFER_CODECS, (event, data) => {
-        console.log(data);
+        //console.log(data);
         this._codecMetadata = {
           audio: {
             container: data.audio.container,
@@ -102,6 +82,7 @@ class VideoPlayer {
           },
         };
       });
+
       hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
         //console.log(data);
         this._pushAbrTimeSeriesData({
@@ -127,7 +108,28 @@ class VideoPlayer {
           };
         }
       });
-      this._playerTech = hls;
+
+      hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+        console.log('Manifest parsed');
+        console.log(data);
+
+        let availableLevels = [];
+        data.levels.forEach(l => {
+          availableLevels.push({
+            bitrate: l.bitrate,
+            resolution: l.width + 'x' + l.height,
+            videoCodec: l.videoCodec,
+            audioCodec: l.audioCodec,
+          });
+        });
+        this._levelBucketCount = availableLevels.length;
+        this._abrMetadata = {
+          availableLevels,
+        };
+
+        this._videoElement.play();
+        resolve();
+      });
     });
   }
 
