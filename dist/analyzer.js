@@ -87762,6 +87762,7 @@ var Analyzer = function () {
             console.log('Initializing ABR visualizer');
             return abrViz.init();
           }).then(function () {
+            _this2._videoPlayer.play();
             resolve();
           }).catch(function (errmsg) {
             _this2._handleError(errmsg);
@@ -88180,6 +88181,11 @@ var VideoPlayer = function () {
       });
     }
   }, {
+    key: 'play',
+    value: function play() {
+      this._videoElement.play();
+    }
+  }, {
     key: '_initiateHlsPlayer',
     value: function _initiateHlsPlayer() {
       var _this2 = this;
@@ -88236,6 +88242,12 @@ var VideoPlayer = function () {
           }
         });
 
+        hls.on(Hls.Events.ERROR, function (event, data) {
+          if (data.fatal) {
+            console.error(data);
+          }
+        });
+
         hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
           console.log('Manifest parsed');
           console.log(data);
@@ -88254,7 +88266,6 @@ var VideoPlayer = function () {
             availableLevels: availableLevels
           };
 
-          _this2._videoElement.play();
           resolve();
         });
       });

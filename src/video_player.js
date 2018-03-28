@@ -44,6 +44,10 @@ class VideoPlayer {
     });
   }
 
+  play() {
+    this._videoElement.play();
+  }
+
   get codecMetadata() {
     return this._codecMetadata;
   }
@@ -109,6 +113,12 @@ class VideoPlayer {
         }
       });
 
+      hls.on(Hls.Events.ERROR, function (event, data) {
+        if (data.fatal) {
+          console.error(data);
+        }
+      });
+
       hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
         console.log('Manifest parsed');
         console.log(data);
@@ -127,7 +137,6 @@ class VideoPlayer {
           availableLevels,
         };
 
-        this._videoElement.play();
         resolve();
       });
     });

@@ -40,6 +40,7 @@ class Analyzer {
           console.log('Initializing ABR visualizer');
           return abrViz.init();
         }).then(() => {
+          this._videoPlayer.play();
           resolve();
         })
         .catch(errmsg => {
