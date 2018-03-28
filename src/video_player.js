@@ -1,13 +1,17 @@
 const request = require('request');
 const Hls = require('hls.js');
+const shaka = require('shaka-player');
 
 const ENUM_TYPE_HLS = 'HLS';
 const ENUM_TYPE_MPEGDASH = 'MPD';
+const ENUM_TYPE_NO_CONTENT_TYPE = 'BAD_CONTENT_TYPE';
 
 const TIME_SERIES_BUFFER_SIZE = 20;
 
 const CONTENT_TYPE_MAP = {
   'application/x-mpegURL': ENUM_TYPE_HLS,
+  'application/octet-stream': ENUM_TYPE_NO_CONTENT_TYPE,
+  'binary/octet-stream': ENUM_TYPE_NO_CONTENT_TYPE,
 };
 
 class VideoPlayer {
@@ -29,11 +33,15 @@ class VideoPlayer {
 
   init() {
     return new Promise((resolve, reject) => {
-      this._determineType(this._uri).then(type => {
+      this._validateUrl(this._uri).then(() => {
+        return this._determineType(this._uri);
+      }).then(type => {
         let playerPromise;
         this._playerTechType = type;
         if (this._playerTechType === ENUM_TYPE_HLS) {
           playerPromise = this._initiateHlsPlayer();
+        } else if (this._playerTechType === ENUM_TYPE_MPEGDASH) {
+          playerPromise = this._initiateDashPlayer();
         } else {
           reject(`No player tech available for type '${type}'`);
         }
@@ -54,6 +62,18 @@ class VideoPlayer {
 
   get abrTimeSeriesData() {
     return this._abrTimeSeries;
+  }
+
+  _initiateDashPlayer() {
+    return new Promise((resolve, reject) => {
+      const shakap = new shaka.Player(this._videoElement);
+      console.log('Using shaka (MPEG-DASH)');
+      shakap.load(this._uri, () => {
+        console.log('Shaka player loaded manifest');
+        this._videoElement.play();
+        resolve();
+      }).catch(reject);
+    });
   }
 
   _initiateHlsPlayer() {
@@ -139,16 +159,29 @@ class VideoPlayer {
     }
   }
 
+  _validateUrl(uri) {
+    return new Promise((resolve, reject) => {
+      resolve();
+    });
+  }
+
   _determineType(uri) {
     return new Promise((resolve, reject) => {
       request(uri, (err, resp, body) => {
         if (resp.statusCode !== 200) {
           reject('Stream not found');
         } else {
-          const type = CONTENT_TYPE_MAP[resp.headers['content-type']];
+          let type = CONTENT_TYPE_MAP[resp.headers['content-type']];
           if (!type) {
             reject(`Unsupported content '${resp.headers['content-type']}'`);
           } else {
+            if (type === ENUM_TYPE_NO_CONTENT_TYPE) {
+              if (uri.match(/\.m3u8/)) {
+                type = ENUM_TYPE_HLS;
+              } else if (uri.match(/\.mpd/)) {
+                type = ENUM_TYPE_MPEGDASH;
+              }
+            }
             resolve(type);
           }
         }

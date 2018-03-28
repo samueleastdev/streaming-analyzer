@@ -1,8 +1,9 @@
 const EXAMPLE_ASSETS = [
   { name: 'Jan Ozer at STSWE17 (HLS, long)', uri: 'https://maitv-vod.lab.eyevinn.technology/stswe17-ozer.mp4/master.m3u8' },
   { name: 'VINN showreel (HLS, short)', uri: 'https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8' },
-  { name: 'Streambox (HLS, live)', uri: 'http://www.streambox.fr/playlists/test_001/stream.m3u8' },
   { name: 'Eyevinn Channel Engine (HLS, live)', uri: 'https://ott-channel-engine.herokuapp.com/live/master.m3u8' },
+  { name: 'Angel One (MPEG-DASH)', uri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd' },
+  { name: 'Sintel 4k (MPEG-DASH)', uri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd' },
 ];
 
 class InputDlg {
