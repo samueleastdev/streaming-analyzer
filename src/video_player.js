@@ -8,6 +8,7 @@ const TIME_SERIES_BUFFER_SIZE = 20;
 
 const CONTENT_TYPE_MAP = {
   'application/x-mpegURL': ENUM_TYPE_HLS,
+  'application/vnd.apple.mpegurl': ENUM_TYPE_HLS,
 };
 
 class VideoPlayer {

@@ -88138,7 +88138,8 @@ var ENUM_TYPE_MPEGDASH = 'MPD';
 var TIME_SERIES_BUFFER_SIZE = 20;
 
 var CONTENT_TYPE_MAP = {
-  'application/x-mpegURL': ENUM_TYPE_HLS
+  'application/x-mpegURL': ENUM_TYPE_HLS,
+  'application/vnd.apple.mpegurl': ENUM_TYPE_HLS
 };
 
 var VideoPlayer = function () {
