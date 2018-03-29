@@ -88584,7 +88584,8 @@ var TIME_SERIES_BUFFER_SIZE = 20;
 var CONTENT_TYPE_MAP = {
   'application/x-mpegURL': ENUM_TYPE_HLS,
   'application/octet-stream': ENUM_TYPE_NO_CONTENT_TYPE,
-  'binary/octet-stream': ENUM_TYPE_NO_CONTENT_TYPE
+  'binary/octet-stream': ENUM_TYPE_NO_CONTENT_TYPE,
+  'application/vnd.apple.mpegurl': ENUM_TYPE_HLS
 };
 
 var VideoPlayer = function () {
@@ -88671,7 +88672,6 @@ var VideoPlayer = function () {
             availableLevels: availableLevels
           };
 
-          console.log(_this2._videoElement.getVideoPlaybackQuality());
           resolve();
         }).catch(function (error) {
           console.error(error);
