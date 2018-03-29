@@ -45,7 +45,10 @@ class AbrVisualizer {
             const g = 255 - r;
             const c = `rgb(${r},${g},0)`;
             canvasCtx.fillStyle = c;
-            const h = (d.sizeBytes / maxSize) * maxBarHeight;
+            let h = (d.sizeBytes / maxSize) * maxBarHeight;
+            if (h < 3) {
+              h = 3;
+            }
             //console.log(x, y, (d.durationSec / maxSegmentDuration) * maxBarWidth, (d.sizeBytes / maxSize) * maxBarHeight);
             canvasCtx.fillRect(x, y + (maxBarHeight - h), (d.durationSec / maxSegmentDuration) * maxBarWidth, h);
           }

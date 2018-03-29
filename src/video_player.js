@@ -79,6 +79,30 @@ class VideoPlayer {
         console.error(ev.detail);
       });
 
+      shakap.getNetworkingEngine().registerResponseFilter((type, response) => {
+        if (type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+          const variantTracks = shakap.getVariantTracks();
+          let activeLevel = -1;
+          for(let l = 0; l < variantTracks.length; l++) {
+            const level = variantTracks[l];
+            if (level.active) {
+              activeLevel = l;
+              break;
+            }
+          }
+          if (!this._levelBucketCount) {
+            this._levelBucketCount = variantTracks.length;
+          } 
+          this._pushAbrTimeSeriesData({
+            levelBucket: activeLevel,
+            levelBucketCount: this._levelBucketCount,
+            loadTimeMs: response.timeMs,
+            sizeBytes: response.data.byteLength,
+            durationSec: 4,
+          });
+        }
+      });
+
       shakap.load(this._uri).then(() => {
         console.log('Shaka player loaded manifest');
         const variantTracks = shakap.getVariantTracks();

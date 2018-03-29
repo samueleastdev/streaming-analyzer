@@ -88117,6 +88117,9 @@ var AbrVisualizer = function () {
               var c = 'rgb(' + r + ',' + g + ',0)';
               canvasCtx.fillStyle = c;
               var h = d.sizeBytes / maxSize * maxBarHeight;
+              if (h < 3) {
+                h = 3;
+              }
               //console.log(x, y, (d.durationSec / maxSegmentDuration) * maxBarWidth, (d.sizeBytes / maxSize) * maxBarHeight);
               canvasCtx.fillRect(x, y + (maxBarHeight - h), d.durationSec / maxSegmentDuration * maxBarWidth, h);
             }
@@ -88648,6 +88651,30 @@ var VideoPlayer = function () {
         _this2._videoElement.addEventListener('error', function (ev) {
           console.error(ev);
           console.error(ev.detail);
+        });
+
+        shakap.getNetworkingEngine().registerResponseFilter(function (type, response) {
+          if (type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
+            var variantTracks = shakap.getVariantTracks();
+            var activeLevel = -1;
+            for (var l = 0; l < variantTracks.length; l++) {
+              var level = variantTracks[l];
+              if (level.active) {
+                activeLevel = l;
+                break;
+              }
+            }
+            if (!_this2._levelBucketCount) {
+              _this2._levelBucketCount = variantTracks.length;
+            }
+            _this2._pushAbrTimeSeriesData({
+              levelBucket: activeLevel,
+              levelBucketCount: _this2._levelBucketCount,
+              loadTimeMs: response.timeMs,
+              sizeBytes: response.data.byteLength,
+              durationSec: 4
+            });
+          }
         });
 
         shakap.load(_this2._uri).then(function () {
