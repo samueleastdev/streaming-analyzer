@@ -88258,7 +88258,7 @@ var Analyzer = function () {
       var overlayLegend = document.createElement('div');
       overlayLegend.className = 'analyzer-overlay-legend';
       var htmlLegend = '';
-      htmlLegend += '<p>Developed by <a href="http://www.eyevinntechnology.se">Eyevinn Technology</a> and built on <a href="https://github.com/video-dev/hls.js">hls.js</a>. Report issues <a href="https://github.com/Eyevinn/streaming-analyzer/issues">here</a>. ';
+      htmlLegend += '<p>Developed by <a href="http://www.eyevinntechnology.se">Eyevinn Technology</a> and built on <a href="https://github.com/video-dev/hls.js">hls.js</a> and <a href="https://shaka-player-demo.appspot.com">Shaka Player</a>. Report issues <a href="https://github.com/Eyevinn/streaming-analyzer/issues">here</a>. ';
       htmlLegend += 'Click on window to hide Analyzer</p>';
       overlayLegend.innerHTML = htmlLegend;
 
@@ -88643,11 +88643,40 @@ var VideoPlayer = function () {
       return new Promise(function (resolve, reject) {
         var shakap = new shaka.Player(_this2._videoElement);
         console.log('Using shaka (MPEG-DASH)');
-        shakap.load(_this2._uri, function () {
+
+        _this2._videoElement.addEventListener('error', function (ev) {
+          console.error(ev);
+          console.error(ev.detail);
+        });
+
+        shakap.load(_this2._uri).then(function () {
           console.log('Shaka player loaded manifest');
-          _this2._videoElement.play();
+          var variantTracks = shakap.getVariantTracks();
+          console.log(variantTracks);
+
+          var availableLevels = [];
+          variantTracks.forEach(function (t) {
+            var codecsArray = t.codecs.split(', ');
+            var vc = codecsArray[0];
+            var ac = codecsArray[1];
+            availableLevels.push({
+              bitrate: t.bandwidth,
+              resolution: t.width + 'x' + t.height,
+              videoCodec: vc,
+              audioCodec: ac
+            });
+          });
+          _this2._levelBucketCount = variantTracks.length;
+          _this2._abrMetadata = {
+            availableLevels: availableLevels
+          };
+
+          console.log(_this2._videoElement.getVideoPlaybackQuality());
           resolve();
-        }).catch(reject);
+        }).catch(function (error) {
+          console.error(error);
+          reject(error.code);
+        });
       });
     }
   }, {

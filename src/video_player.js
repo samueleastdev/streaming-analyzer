@@ -72,11 +72,39 @@ class VideoPlayer {
     return new Promise((resolve, reject) => {
       const shakap = new shaka.Player(this._videoElement);
       console.log('Using shaka (MPEG-DASH)');
-      shakap.load(this._uri, () => {
+
+      this._videoElement.addEventListener('error', ev => {
+        console.error(ev);
+        console.error(ev.detail);
+      });
+
+      shakap.load(this._uri).then(() => {
         console.log('Shaka player loaded manifest');
-        this._videoElement.play();
+        const variantTracks = shakap.getVariantTracks();
+        console.log(variantTracks);
+
+        let availableLevels = [];
+        variantTracks.forEach(t => {
+          const codecsArray = t.codecs.split(', ');
+          const vc = codecsArray[0];
+          const ac = codecsArray[1];
+          availableLevels.push({
+            bitrate: t.bandwidth,
+            resolution: t.width + 'x' + t.height,
+            videoCodec: vc,
+            audioCodec: ac,
+          });
+        });
+        this._levelBucketCount = variantTracks.length;
+        this._abrMetadata = {
+          availableLevels,
+        };
+
         resolve();
-      }).catch(reject);
+      }).catch(error => {
+        console.error(error);
+        reject(error.code);
+      });
     });
   }
 
