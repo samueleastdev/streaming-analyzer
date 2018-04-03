@@ -1,6 +1,5 @@
 const request = require('request');
 const Hls = require('hls.js');
-const shaka = require('shaka-player');
 
 const ENUM_TYPE_HLS = 'HLS';
 const ENUM_TYPE_MPEGDASH = 'MPD';
