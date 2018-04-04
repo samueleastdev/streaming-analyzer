@@ -4,6 +4,8 @@ const EXAMPLE_ASSETS = [
   { name: 'Eyevinn Channel Engine (HLS, live)', uri: 'https://ott-channel-engine.herokuapp.com/live/master.m3u8' },
   { name: 'Angel One (MPEG-DASH)', uri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd' },
   { name: 'Sintel 4k (MPEG-DASH)', uri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd' },
+  { name: 'Test Picture (MPEG-DASH, live)', uri: 'https://vm2.dashif.org/livesim/mup_30/testpic_2s/Manifest.mpd' },
+  { name: 'ARD (MPEG-DASH, live)', uri: 'https://irtdashreference-i.akamaihd.net/dash/live/901161/bfs/manifestARD.mpd' },
 ];
 
 class InputDlg {

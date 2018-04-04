@@ -12,6 +12,7 @@ const CONTENT_TYPE_MAP = {
   'application/octet-stream': ENUM_TYPE_NO_CONTENT_TYPE,
   'binary/octet-stream': ENUM_TYPE_NO_CONTENT_TYPE,
   'application/vnd.apple.mpegurl': ENUM_TYPE_HLS,
+  'application/dash+xml': ENUM_TYPE_MPEGDASH,
 };
 
 class VideoPlayer {
@@ -73,38 +74,83 @@ class VideoPlayer {
       const shakap = new shaka.Player(this._videoElement);
       console.log('Using shaka (MPEG-DASH)');
 
-      this._videoElement.addEventListener('error', ev => {
+      shakap.addEventListener('error', ev => {
         console.error(ev);
-        console.error(ev.detail);
       });
 
-      shakap.getNetworkingEngine().registerResponseFilter((type, response) => {
-        if (type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
-          const variantTracks = shakap.getVariantTracks();
-          let activeLevel = -1;
-          for(let l = 0; l < variantTracks.length; l++) {
-            const level = variantTracks[l];
-            if (level.active) {
-              activeLevel = l;
-              break;
-            }
+      shakap.addEventListener('segmentloaded', ev => {
+        //console.log(ev);
+        const variantTracks = shakap.getVariantTracks().filter(t => t.primary).sort((a, b) => a.height - b.height);
+        let activeLevel = -1;
+        for(let l = 0; l < variantTracks.length; l++) {
+          const level = variantTracks[l];
+          if (level.active) {
+            activeLevel = l;
+            break;
           }
-          if (!this._levelBucketCount) {
-            this._levelBucketCount = variantTracks.length;
-          } 
+        }
+        if (!this._levelBucketCount) {
+          this._levelBucketCount = variantTracks.length;
+        }
+        if (ev.detail.duration) {
           this._pushAbrTimeSeriesData({
             levelBucket: activeLevel,
             levelBucketCount: this._levelBucketCount,
-            loadTimeMs: response.timeMs,
-            sizeBytes: response.data.byteLength,
-            durationSec: 4,
+            loadTimeMs: ev.detail.loadTime,
+            sizeBytes: ev.detail.size,
+            durationSec: ev.detail.duration,
           });
+
+          this._abrStats.totalChunkCount++;
+          this._abrStats.totalChunkDuration += ev.detail.duration;
+          this._abrStats.totalChunkSizeKB += (ev.detail.size / 1000);
+          this._abrStats.totalLoadTimeSec += (ev.detail.loadTime / 1000);
+          const chunkBitrate = (ev.detail.size * 8) / ev.detail.duration;
+          this._abrStats.totalChunkBitrateKbps += (chunkBitrate / 1000);
+          if (this._abrMetadata) {
+            //console.log(ev.detail, this._abrStats);
+            this._abrMetadata.stats = {
+              chunksDownloaded: this._abrStats.totalChunkCount,
+              averageChunkDuration: this._abrStats.totalChunkDuration / this._abrStats.totalChunkCount,
+              averageChunkSizeKB: this._abrStats.totalChunkSizeKB / this._abrStats.totalChunkCount,
+              averageLoadTime: this._abrStats.totalLoadTimeSec / this._abrStats.totalChunkCount,
+              averageChunkBitrateKbps: this._abrStats.totalChunkBitrateKbps / this._abrStats.totalChunkCount,
+            };
+          }
         }
+      });
+
+      shakap.addEventListener('sourcebufferinitiated', ev => {
+        //console.log(ev);
+        const audioMimeType = ev.detail.audioMimeType.split('; ');
+        const videoMimeType = ev.detail.videoMimeType.split('; ');
+        let audioCodec;
+        let videoCodec;
+        let m = audioMimeType[1].match(/codecs="(.*)"$/);
+        if (m) {
+          audioCodec = m[1];
+        }
+        m = videoMimeType[1].match(/codecs="(.*)"$/);
+        if (m) {
+          videoCodec = m[1];
+        }
+        this._codecMetadata = {
+          audio: {
+            container: audioMimeType[0],
+            codec: audioCodec,
+            channels: ev.detail.audioChannels,
+          },
+          video: {
+            container: videoMimeType[0],
+            codec: videoCodec,
+            resolution: '',
+          },
+        };
       });
 
       shakap.load(this._uri).then(() => {
         console.log('Shaka player loaded manifest');
-        const variantTracks = shakap.getVariantTracks();
+        const variantTracks = shakap.getVariantTracks().filter(t => t.primary).sort((a, b) => a.height - b.height);
         console.log(variantTracks);
 
         let availableLevels = [];

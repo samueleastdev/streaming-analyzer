@@ -87969,7 +87969,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var EXAMPLE_ASSETS = [{ name: 'Jan Ozer at STSWE17 (HLS, long)', uri: 'https://maitv-vod.lab.eyevinn.technology/stswe17-ozer.mp4/master.m3u8' }, { name: 'VINN showreel (HLS, short)', uri: 'https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8' }, { name: 'Eyevinn Channel Engine (HLS, live)', uri: 'https://ott-channel-engine.herokuapp.com/live/master.m3u8' }, { name: 'Angel One (MPEG-DASH)', uri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd' }, { name: 'Sintel 4k (MPEG-DASH)', uri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd' }];
+var EXAMPLE_ASSETS = [{ name: 'Jan Ozer at STSWE17 (HLS, long)', uri: 'https://maitv-vod.lab.eyevinn.technology/stswe17-ozer.mp4/master.m3u8' }, { name: 'VINN showreel (HLS, short)', uri: 'https://maitv-vod.lab.eyevinn.technology/VINN.mp4/master.m3u8' }, { name: 'Eyevinn Channel Engine (HLS, live)', uri: 'https://ott-channel-engine.herokuapp.com/live/master.m3u8' }, { name: 'Angel One (MPEG-DASH)', uri: 'https://storage.googleapis.com/shaka-demo-assets/angel-one/dash.mpd' }, { name: 'Sintel 4k (MPEG-DASH)', uri: 'https://storage.googleapis.com/shaka-demo-assets/sintel-mp4-only/dash.mpd' }, { name: 'Test Picture (MPEG-DASH, live)', uri: 'https://vm2.dashif.org/livesim/mup_30/testpic_2s/Manifest.mpd' }, { name: 'ARD (MPEG-DASH, live)', uri: 'https://irtdashreference-i.akamaihd.net/dash/live/901161/bfs/manifestARD.mpd' }];
 
 var InputDlg = function () {
   function InputDlg() {
@@ -88145,7 +88145,8 @@ var CONTENT_TYPE_MAP = {
   'application/x-mpegURL': ENUM_TYPE_HLS,
   'application/octet-stream': ENUM_TYPE_NO_CONTENT_TYPE,
   'binary/octet-stream': ENUM_TYPE_NO_CONTENT_TYPE,
-  'application/vnd.apple.mpegurl': ENUM_TYPE_HLS
+  'application/vnd.apple.mpegurl': ENUM_TYPE_HLS,
+  'application/dash+xml': ENUM_TYPE_MPEGDASH
 };
 
 var VideoPlayer = function () {
@@ -88205,38 +88206,91 @@ var VideoPlayer = function () {
         var shakap = new shaka.Player(_this2._videoElement);
         console.log('Using shaka (MPEG-DASH)');
 
-        _this2._videoElement.addEventListener('error', function (ev) {
+        shakap.addEventListener('error', function (ev) {
           console.error(ev);
-          console.error(ev.detail);
         });
 
-        shakap.getNetworkingEngine().registerResponseFilter(function (type, response) {
-          if (type === shaka.net.NetworkingEngine.RequestType.SEGMENT) {
-            var variantTracks = shakap.getVariantTracks();
-            var activeLevel = -1;
-            for (var l = 0; l < variantTracks.length; l++) {
-              var level = variantTracks[l];
-              if (level.active) {
-                activeLevel = l;
-                break;
-              }
+        shakap.addEventListener('segmentloaded', function (ev) {
+          //console.log(ev);
+          var variantTracks = shakap.getVariantTracks().filter(function (t) {
+            return t.primary;
+          }).sort(function (a, b) {
+            return a.height - b.height;
+          });
+          var activeLevel = -1;
+          for (var l = 0; l < variantTracks.length; l++) {
+            var level = variantTracks[l];
+            if (level.active) {
+              activeLevel = l;
+              break;
             }
-            if (!_this2._levelBucketCount) {
-              _this2._levelBucketCount = variantTracks.length;
-            }
+          }
+          if (!_this2._levelBucketCount) {
+            _this2._levelBucketCount = variantTracks.length;
+          }
+          if (ev.detail.duration) {
             _this2._pushAbrTimeSeriesData({
               levelBucket: activeLevel,
               levelBucketCount: _this2._levelBucketCount,
-              loadTimeMs: response.timeMs,
-              sizeBytes: response.data.byteLength,
-              durationSec: 4
+              loadTimeMs: ev.detail.loadTime,
+              sizeBytes: ev.detail.size,
+              durationSec: ev.detail.duration
             });
+
+            _this2._abrStats.totalChunkCount++;
+            _this2._abrStats.totalChunkDuration += ev.detail.duration;
+            _this2._abrStats.totalChunkSizeKB += ev.detail.size / 1000;
+            _this2._abrStats.totalLoadTimeSec += ev.detail.loadTime / 1000;
+            var chunkBitrate = ev.detail.size * 8 / ev.detail.duration;
+            _this2._abrStats.totalChunkBitrateKbps += chunkBitrate / 1000;
+            if (_this2._abrMetadata) {
+              //console.log(ev.detail, this._abrStats);
+              _this2._abrMetadata.stats = {
+                chunksDownloaded: _this2._abrStats.totalChunkCount,
+                averageChunkDuration: _this2._abrStats.totalChunkDuration / _this2._abrStats.totalChunkCount,
+                averageChunkSizeKB: _this2._abrStats.totalChunkSizeKB / _this2._abrStats.totalChunkCount,
+                averageLoadTime: _this2._abrStats.totalLoadTimeSec / _this2._abrStats.totalChunkCount,
+                averageChunkBitrateKbps: _this2._abrStats.totalChunkBitrateKbps / _this2._abrStats.totalChunkCount
+              };
+            }
           }
+        });
+
+        shakap.addEventListener('sourcebufferinitiated', function (ev) {
+          //console.log(ev);
+          var audioMimeType = ev.detail.audioMimeType.split('; ');
+          var videoMimeType = ev.detail.videoMimeType.split('; ');
+          var audioCodec = void 0;
+          var videoCodec = void 0;
+          var m = audioMimeType[1].match(/codecs="(.*)"$/);
+          if (m) {
+            audioCodec = m[1];
+          }
+          m = videoMimeType[1].match(/codecs="(.*)"$/);
+          if (m) {
+            videoCodec = m[1];
+          }
+          _this2._codecMetadata = {
+            audio: {
+              container: audioMimeType[0],
+              codec: audioCodec,
+              channels: ev.detail.audioChannels
+            },
+            video: {
+              container: videoMimeType[0],
+              codec: videoCodec,
+              resolution: ''
+            }
+          };
         });
 
         shakap.load(_this2._uri).then(function () {
           console.log('Shaka player loaded manifest');
-          var variantTracks = shakap.getVariantTracks();
+          var variantTracks = shakap.getVariantTracks().filter(function (t) {
+            return t.primary;
+          }).sort(function (a, b) {
+            return a.height - b.height;
+          });
           console.log(variantTracks);
 
           var availableLevels = [];
