@@ -93,7 +93,7 @@ class Analyzer {
     const overlayLegend = document.createElement('div');
     overlayLegend.className = 'analyzer-overlay-legend';
     let htmlLegend = '';
-    htmlLegend += '<p>Developed by <a href="http://www.eyevinntechnology.se">Eyevinn Technology</a> and built on <a href="https://github.com/video-dev/hls.js">hls.js</a> and <a href="https://shaka-player-demo.appspot.com">Shaka Player</a>. Report issues <a href="https://github.com/Eyevinn/streaming-analyzer/issues">here</a>. ';
+    htmlLegend += '<p>Developed by <a href="http://www.eyevinntechnology.se">Eyevinn Technology</a> and built on <a href="https://github.com/video-dev/hls.js">hls.js</a> and slightly modified <a href="https://shaka-player-demo.appspot.com">Shaka Player</a>. Report issues <a href="https://github.com/Eyevinn/streaming-analyzer/issues">here</a>. ';
     htmlLegend += 'Click on window to hide Analyzer</p>';
     overlayLegend.innerHTML = htmlLegend;
 
