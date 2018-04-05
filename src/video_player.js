@@ -13,6 +13,7 @@ const CONTENT_TYPE_MAP = {
   'binary/octet-stream': ENUM_TYPE_NO_CONTENT_TYPE,
   'application/vnd.apple.mpegurl': ENUM_TYPE_HLS,
   'application/dash+xml': ENUM_TYPE_MPEGDASH,
+  'application/vnd.apple.mpegurl;charset=UTF-8': ENUM_TYPE_HLS,
 };
 
 class VideoPlayer {

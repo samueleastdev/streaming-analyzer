@@ -88146,7 +88146,8 @@ var CONTENT_TYPE_MAP = {
   'application/octet-stream': ENUM_TYPE_NO_CONTENT_TYPE,
   'binary/octet-stream': ENUM_TYPE_NO_CONTENT_TYPE,
   'application/vnd.apple.mpegurl': ENUM_TYPE_HLS,
-  'application/dash+xml': ENUM_TYPE_MPEGDASH
+  'application/dash+xml': ENUM_TYPE_MPEGDASH,
+  'application/vnd.apple.mpegurl;charset=UTF-8': ENUM_TYPE_HLS
 };
 
 var VideoPlayer = function () {
